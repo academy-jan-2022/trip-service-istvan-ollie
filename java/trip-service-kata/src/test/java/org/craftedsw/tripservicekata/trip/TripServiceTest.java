@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -75,13 +77,68 @@ public class TripServiceTest {
 	public void
 	should_return_expected_trips_of_user_when_they_have_multiple_trips(){
 		LOGGED_IN_USER_RESULT = LOGGED_IN_USER;
-		var userToGetTripsFor = new User();
-		userToGetTripsFor.addFriend(LOGGED_IN_USER);
-		userToGetTripsFor.addTrip(TO_PARIS);
-		userToGetTripsFor.addTrip(TO_LONDON);
+		var userToGetTripsFor = new UserBuilder()
+						.trips(List.of(TO_LONDON, TO_PARIS))
+						.friends(LOGGED_IN_USER)
+						.build();
+
 		var result = tripService.getTripsByUser(userToGetTripsFor);
 		assertEquals(2, result.size());
 
+	}
+
+	public class UserBuilder {
+		private final User user;
+		private final List<Trip> trips;
+		private final List<User> friends;
+
+		private UserBuilder(User user, List<Trip> trips, List<User> friends) {
+			this.user = user;
+			this.trips = trips;
+			this.friends = friends;
+		}
+
+		public UserBuilder(){
+			this(new User(), List.of(), List.of());
+		}
+
+		public UserBuilder trips(List<Trip> tripsToAdd){
+			var newTrips = Stream
+					.concat(this.trips.stream(), tripsToAdd.stream())
+					.collect(Collectors.toList());
+			return new UserBuilder(user, newTrips, friends);
+		}
+
+		public UserBuilder trips(Trip tripsToAdd){
+			var newTrips = Stream
+					.concat(this.trips.stream(), Stream.of(tripsToAdd))
+					.collect(Collectors.toList());
+			return new UserBuilder(user, newTrips, friends);
+		}
+
+		public UserBuilder friends(List<User> friendsToAdd){
+			var newFriends = Stream
+					.concat(this.friends.stream(), friendsToAdd.stream())
+					.collect(Collectors.toList());
+			return new UserBuilder(user, trips, newFriends);
+		}
+
+		public UserBuilder friends(User friendsToAdd){
+			var newFriends = Stream
+					.concat(this.friends.stream(), Stream.of(friendsToAdd))
+					.collect(Collectors.toList());
+			return new UserBuilder(user, trips, newFriends);
+		}
+
+		public User build(){
+			for (var trip : trips){
+				this.user.addTrip(trip);
+			}
+			for (var friend : friends){
+				this.user.addFriend(friend);
+			}
+			return this.user;
+		}
 	}
 
 	public class TripServiceTestable extends TripService {

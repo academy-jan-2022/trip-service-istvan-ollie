@@ -16,7 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class TripServiceTest {
 
 	private static final User GUEST = null;
+	private static final User LOGGED_IN_USER = new User();
 	private User LOGGED_IN_USER_RESULT = null;
+	private static final Trip TO_LONDON = new Trip();
 	private TripServiceTestable tripService;
 
 	@BeforeEach
@@ -28,24 +30,22 @@ public class TripServiceTest {
 	@Test
 	public void
 	should_throw_exception_when_no_user_logged_in(){
-		User user = GUEST;
-		assertThrows(UserNotLoggedInException.class, () -> tripService.getTripsByUser(user));
+		LOGGED_IN_USER_RESULT = GUEST;
+		assertThrows(UserNotLoggedInException.class, () -> tripService.getTripsByUser(new User()));
 	}
 
 
 	@Test
 	public void
 	should_return_trips_of_users_friends(){
-		var loggedInUser = new User();
+		LOGGED_IN_USER_RESULT = LOGGED_IN_USER;
 		var userToGetTripsFor = new User();
-		LOGGED_IN_USER_RESULT = loggedInUser;
 
-		userToGetTripsFor.addFriend(loggedInUser);
-		userToGetTripsFor.addTrip(new Trip());
+		userToGetTripsFor.addFriend(LOGGED_IN_USER);
+		userToGetTripsFor.addTrip(TO_LONDON);
 
 		var userTrips = tripService.getTripsByUser(userToGetTripsFor);
 		assertEquals(1, userTrips.size());
-
 	}
 
 	public class TripServiceTestable extends TripService {

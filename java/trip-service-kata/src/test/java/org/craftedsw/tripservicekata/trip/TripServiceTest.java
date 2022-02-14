@@ -2,10 +2,8 @@ package org.craftedsw.tripservicekata.trip;
 
 import org.craftedsw.tripservicekata.exception.UserNotLoggedInException;
 import org.craftedsw.tripservicekata.user.User;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 import java.util.List;
 
@@ -34,6 +32,16 @@ public class TripServiceTest {
 		assertThrows(UserNotLoggedInException.class, () -> tripService.getTripsByUser(new User()));
 	}
 
+	@Test
+	public void
+	should_return_empty_list_when_requested_user_is_not_a_friend(){
+		LOGGED_IN_USER_RESULT = LOGGED_IN_USER;
+		var userToGetTripsFor = new User();
+		userToGetTripsFor.addTrip(TO_LONDON);
+
+		var userTrips = tripService.getTripsByUser(userToGetTripsFor);
+		assertEquals(0, userTrips.size());
+	}
 
 	@Test
 	public void

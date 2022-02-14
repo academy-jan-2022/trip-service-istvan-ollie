@@ -6,8 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,21 +21,21 @@ public class TripServiceTest {
 	private TripServiceTestable tripService;
 
 	@BeforeEach
-	void setUp(){
+	void setUp() {
 		tripService = new TripServiceTestable();
 		LOGGED_IN_USER_RESULT = null;
 	}
 
 	@Test
 	public void
-	should_throw_exception_when_no_user_logged_in(){
+	should_throw_exception_when_no_user_logged_in() {
 		LOGGED_IN_USER_RESULT = GUEST;
 		assertThrows(UserNotLoggedInException.class, () -> tripService.getTripsByUser(new User()));
 	}
 
 	@Test
 	public void
-	should_return_empty_list_when_requested_user_is_not_a_friend(){
+	should_return_empty_list_when_requested_user_is_not_a_friend() {
 		LOGGED_IN_USER_RESULT = LOGGED_IN_USER;
 		var userToGetTripsFor = new User();
 		userToGetTripsFor.addTrip(TO_LONDON);
@@ -48,7 +46,7 @@ public class TripServiceTest {
 
 	@Test
 	public void
-	should_return_only_requested_users_list_even_with_multiple_friends(){
+	should_return_only_requested_users_list_even_with_multiple_friends() {
 		LOGGED_IN_USER_RESULT = LOGGED_IN_USER;
 		var userToGetTripsFor = new User();
 		var userWeAreNotInterestedIn = new User();
@@ -62,12 +60,12 @@ public class TripServiceTest {
 
 	@Test
 	public void
-	should_return_trips_of_users_friends(){
+	should_return_trips_of_users_friends() {
 		LOGGED_IN_USER_RESULT = LOGGED_IN_USER;
-		var userToGetTripsFor = new User();
-
-		userToGetTripsFor.addFriend(LOGGED_IN_USER);
-		userToGetTripsFor.addTrip(TO_LONDON);
+		var userToGetTripsFor = new UserBuilder()
+				  .trips(TO_LONDON)
+				  .friends(LOGGED_IN_USER)
+				  .build();
 
 		var userTrips = tripService.getTripsByUser(userToGetTripsFor);
 		assertEquals(1, userTrips.size());
@@ -75,70 +73,16 @@ public class TripServiceTest {
 
 	@Test
 	public void
-	should_return_expected_trips_of_user_when_they_have_multiple_trips(){
+	should_return_expected_trips_of_user_when_they_have_multiple_trips() {
 		LOGGED_IN_USER_RESULT = LOGGED_IN_USER;
 		var userToGetTripsFor = new UserBuilder()
-						.trips(List.of(TO_LONDON, TO_PARIS))
-						.friends(LOGGED_IN_USER)
-						.build();
+				  .trips(List.of(TO_LONDON, TO_PARIS))
+				  .friends(LOGGED_IN_USER)
+				  .build();
 
 		var result = tripService.getTripsByUser(userToGetTripsFor);
 		assertEquals(2, result.size());
 
-	}
-
-	public class UserBuilder {
-		private final User user;
-		private final List<Trip> trips;
-		private final List<User> friends;
-
-		private UserBuilder(User user, List<Trip> trips, List<User> friends) {
-			this.user = user;
-			this.trips = trips;
-			this.friends = friends;
-		}
-
-		public UserBuilder(){
-			this(new User(), List.of(), List.of());
-		}
-
-		public UserBuilder trips(List<Trip> tripsToAdd){
-			var newTrips = Stream
-					.concat(this.trips.stream(), tripsToAdd.stream())
-					.collect(Collectors.toList());
-			return new UserBuilder(user, newTrips, friends);
-		}
-
-		public UserBuilder trips(Trip tripsToAdd){
-			var newTrips = Stream
-					.concat(this.trips.stream(), Stream.of(tripsToAdd))
-					.collect(Collectors.toList());
-			return new UserBuilder(user, newTrips, friends);
-		}
-
-		public UserBuilder friends(List<User> friendsToAdd){
-			var newFriends = Stream
-					.concat(this.friends.stream(), friendsToAdd.stream())
-					.collect(Collectors.toList());
-			return new UserBuilder(user, trips, newFriends);
-		}
-
-		public UserBuilder friends(User friendsToAdd){
-			var newFriends = Stream
-					.concat(this.friends.stream(), Stream.of(friendsToAdd))
-					.collect(Collectors.toList());
-			return new UserBuilder(user, trips, newFriends);
-		}
-
-		public User build(){
-			for (var trip : trips){
-				this.user.addTrip(trip);
-			}
-			for (var friend : friends){
-				this.user.addFriend(friend);
-			}
-			return this.user;
-		}
 	}
 
 	public class TripServiceTestable extends TripService {
@@ -149,7 +93,7 @@ public class TripServiceTest {
 		}
 
 		@Override
-		protected List<Trip> getTripsFor(User user){
+		protected List<Trip> getTripsFor(User user) {
 			return user.trips();
 		}
 	}

@@ -45,6 +45,20 @@ public class TripServiceTest {
 
 	@Test
 	public void
+	should_return_only_requested_users_list_even_with_multiple_friends(){
+		LOGGED_IN_USER_RESULT = LOGGED_IN_USER;
+		var userToGetTripsFor = new User();
+		var userWeAreNotInterestedIn = new User();
+		userToGetTripsFor.addTrip(TO_LONDON);
+		userToGetTripsFor.addFriend(LOGGED_IN_USER);
+		userToGetTripsFor.addFriend(userWeAreNotInterestedIn);
+
+		var userTrips = tripService.getTripsByUser(userToGetTripsFor);
+		assertEquals(1, userTrips.size());
+	}
+
+	@Test
+	public void
 	should_return_trips_of_users_friends(){
 		LOGGED_IN_USER_RESULT = LOGGED_IN_USER;
 		var userToGetTripsFor = new User();
@@ -65,7 +79,7 @@ public class TripServiceTest {
 
 		@Override
 		protected List<Trip> getTripsFor(User user){
-			return List.of(new Trip());
+			return user.trips();
 		}
 	}
 

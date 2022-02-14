@@ -1,5 +1,6 @@
-package org.craftedsw.tripservicekata.trip;
+package org.craftedsw.tripservicekata.Utils.Builders;
 
+import org.craftedsw.tripservicekata.trip.Trip;
 import org.craftedsw.tripservicekata.user.User;
 
 import java.util.List;

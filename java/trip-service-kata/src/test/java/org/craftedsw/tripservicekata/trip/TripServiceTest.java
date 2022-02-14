@@ -1,5 +1,6 @@
 package org.craftedsw.tripservicekata.trip;
 
+import org.craftedsw.tripservicekata.Utils.Builders.UserBuilder;
 import org.craftedsw.tripservicekata.exception.UserNotLoggedInException;
 import org.craftedsw.tripservicekata.user.User;
 import org.junit.jupiter.api.BeforeEach;

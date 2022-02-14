@@ -17,6 +17,7 @@ public class TripServiceTest {
 	private static final User LOGGED_IN_USER = new User();
 	private User LOGGED_IN_USER_RESULT = null;
 	private static final Trip TO_LONDON = new Trip();
+	private static final Trip TO_PARIS = new Trip();
 	private TripServiceTestable tripService;
 
 	@BeforeEach
@@ -68,6 +69,19 @@ public class TripServiceTest {
 
 		var userTrips = tripService.getTripsByUser(userToGetTripsFor);
 		assertEquals(1, userTrips.size());
+	}
+
+	@Test
+	public void
+	should_return_expected_trips_of_user_when_they_have_multiple_trips(){
+		LOGGED_IN_USER_RESULT = LOGGED_IN_USER;
+		var userToGetTripsFor = new User();
+		userToGetTripsFor.addFriend(LOGGED_IN_USER);
+		userToGetTripsFor.addTrip(TO_PARIS);
+		userToGetTripsFor.addTrip(TO_LONDON);
+		var result = tripService.getTripsByUser(userToGetTripsFor);
+		assertEquals(2, result.size());
+
 	}
 
 	public class TripServiceTestable extends TripService {
